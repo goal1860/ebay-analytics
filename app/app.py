@@ -1,6 +1,15 @@
 import os
 import sqlite3
+import requests
 from flask import Flask, render_template, request
+from dotenv import load_dotenv
+import sys
+
+# Add parent directory to sys.path so we can import auth
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+from auth import get_app_token
+
+load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
 
 app = Flask(__name__)
 
@@ -13,6 +22,23 @@ def query(sql: str, params: tuple = ()):
     rows = conn.execute(sql, params).fetchall()
     conn.close()
     return rows
+
+def get_category_tree(token, tree_id='2'):
+    url = f"https://api.ebay.com/commerce/taxonomy/v1/category_tree/{tree_id}"
+    headers = {"Authorization": f"Bearer {token}", "Accept-Encoding": "application/gzip"}
+    response = requests.get(url, headers=headers)
+    response.raise_for_status()
+    return response.json()
+
+tree_cache = None
+
+@app.route("/categories")
+def categories():
+    global tree_cache
+    if tree_cache is None:
+        token = get_app_token()
+        tree_cache = get_category_tree(token)['rootCategoryNode']['childCategoryTreeNodes']
+    return render_template("categories.html", nodes=tree_cache)
 
 
 @app.route("/")

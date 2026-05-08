@@ -10,6 +10,9 @@
   <header>
     <h1>eBay Top Sellers</h1>
     <p class="subtitle">{{ total }} items ranked by eBay bestMatch across 20 categories</p>
+    <div style="margin-top: 10px;">
+      <a href="/categories" style="color: white; text-decoration: underline;">View Full Category Tree</a>
+    </div>
   </header>
 
   <main>
@@ -59,7 +62,7 @@
             <td class="num">{{ item.rank }}</td>
             <td class="title">{{ item.title }}</td>
             <td>
-              {{ item.primary_category }}
+              <a href="/categories?highlight={{ item.primary_category | urlencode }}">{{ item.primary_category }}</a>
               {% if item.also_in_categories %}
               <span class="also" title="Also in: {{ item.also_in_categories }}">+</span>
               {% endif %}
