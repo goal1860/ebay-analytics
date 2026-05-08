@@ -2,7 +2,8 @@
 .token.json
 certs/
 data/
-db/
+*.db-shm
+*.db-wal
 .venv/
 .claude/
 __pycache__/
