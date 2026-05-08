@@ -1,0 +1,10 @@
+.env
+.token.json
+certs/
+data/
+db/
+.venv/
+.claude/
+__pycache__/
+*.pyc
+*.pyo

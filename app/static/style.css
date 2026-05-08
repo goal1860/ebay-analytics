@@ -1,0 +1,113 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 14px;
+  color: #1a1a1a;
+  background: #f5f5f5;
+}
+
+/* Header */
+header {
+  background: #1a1a2e;
+  color: #fff;
+  padding: 20px 32px;
+}
+header h1 { font-size: 22px; font-weight: 600; }
+header .subtitle { color: #aaa; margin-top: 4px; font-size: 13px; }
+
+/* Main */
+main { padding: 20px 32px; max-width: 1400px; }
+
+/* Filters */
+.filters {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.filters input[type="text"] {
+  padding: 7px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+  width: 280px;
+}
+.filters select {
+  padding: 7px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+  background: #fff;
+}
+.filters button {
+  padding: 7px 18px;
+  background: #1a1a2e;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+}
+.filters button:hover { background: #2d2d4e; }
+.filters a.clear {
+  color: #666;
+  text-decoration: none;
+  font-size: 13px;
+}
+.filters a.clear:hover { color: #333; }
+
+/* Table */
+.table-wrap {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.08);
+  overflow-x: auto;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+thead {
+  background: #f0f0f0;
+  border-bottom: 2px solid #ddd;
+}
+thead th a {
+  text-decoration: none;
+  color: #333;
+  font-weight: 600;
+  white-space: nowrap;
+}
+thead th a:hover { color: #1a1a2e; }
+th, td {
+  padding: 9px 14px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover { background: #fafafa; }
+
+td.num  { text-align: right; font-variant-numeric: tabular-nums; color: #555; }
+td.title { max-width: 340px; }
+td.seller { color: #555; font-size: 13px; }
+
+span.also {
+  display: inline-block;
+  margin-left: 4px;
+  width: 16px;
+  height: 16px;
+  background: #e8f0fe;
+  color: #1a56db;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+  line-height: 16px;
+  cursor: default;
+}
+
+td a { color: #1a56db; text-decoration: none; font-size: 13px; }
+td a:hover { text-decoration: underline; }
+
+td.empty { text-align: center; color: #999; padding: 40px; }
