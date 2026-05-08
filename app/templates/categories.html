@@ -125,6 +125,39 @@
         from { opacity: 0; transform: translateX(-5px); }
         to { opacity: 1; transform: translateX(0); }
     }
+    
+    /* Market Selector Styles */
+    .market-selector {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+    }
+    .market-tab {
+        padding: 10px 24px;
+        border-radius: 30px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 15px;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .active-market {
+        background-color: #0284c7;
+        color: white;
+        box-shadow: 0 4px 10px rgba(2, 132, 199, 0.3);
+    }
+    .inactive-market {
+        background-color: #f1f5f9;
+        color: #64748b;
+        border: 1px solid #e2e8f0;
+    }
+    .inactive-market:hover {
+        background-color: #e2e8f0;
+        color: #334155;
+        transform: translateY(-1px);
+    }
   </style>
 </head>
 <body>
@@ -137,8 +170,17 @@
   </header>
 
   <main>
+    <div class="market-selector">
+      {% for market, tree_id in markets.items() %}
+        <a href="{{ url_for('categories', market=market) }}" 
+           class="market-tab {% if market == current_market %}active-market{% else %}inactive-market{% endif %}">
+          eBay {{ market }} 
+        </a>
+      {% endfor %}
+    </div>
+
     <div class="category-container">
-      <p style="text-align:center; color:#64748b; margin-bottom:30px;">Click on category bubbles with a [+] to expand their branches</p>
+      <p style="text-align:center; color:#64748b; margin-bottom:30px;">Click on category bubbles with a [+] to expand their branches (Showing {{ current_market }} market)</p>
       
       {% macro render_tree(nodes, root=False) %}
       <ul class="tree {% if root %}tree-root{% endif %}">

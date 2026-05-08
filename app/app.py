@@ -30,15 +30,29 @@ def get_category_tree(token, tree_id='2'):
     response.raise_for_status()
     return response.json()
 
-tree_cache = None
+MARKETS = {
+    "US": "0",
+    "Canada": "2",
+    "Australia": "15"
+}
+
+tree_cache = {}
 
 @app.route("/categories")
 def categories():
-    global tree_cache
-    if tree_cache is None:
+    market = request.args.get("market", "US")
+    if market not in MARKETS:
+        market = "US"
+        
+    tree_id = MARKETS[market]
+    if tree_id not in tree_cache:
         token = get_app_token()
-        tree_cache = get_category_tree(token)['rootCategoryNode']['childCategoryTreeNodes']
-    return render_template("categories.html", nodes=tree_cache)
+        tree_cache[tree_id] = get_category_tree(token, tree_id)['rootCategoryNode']['childCategoryTreeNodes']
+        
+    return render_template("categories.html", 
+                           nodes=tree_cache[tree_id], 
+                           current_market=market, 
+                           markets=MARKETS)
 
 
 @app.route("/")
