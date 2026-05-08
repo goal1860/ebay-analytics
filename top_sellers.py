@@ -156,6 +156,11 @@ def rank_items(category_results: list[tuple[str, list[dict]]]) -> list[dict]:
                     "condition": it.get("condition", ""),
                     "seller":   it.get("seller", {}).get("username", ""),
                     "item_url": it.get("itemWebUrl", ""),
+                    "free_postage": "Yes" if it.get("shippingOptions", [{}])[0].get("shippingCost", {}).get("value", "") == "0.00" else "No",
+                    "promoted": "Yes" if it.get("priorityListing", False) else "No",
+                    "start_date": it.get("itemCreationDate", "").split("T")[0] if it.get("itemCreationDate") else "-",
+                    "watchers": "-",
+                    "bids": "-"
                 }
 
     ranked = sorted(scores.keys(), key=lambda iid: -scores[iid])
@@ -174,6 +179,12 @@ def rank_items(category_results: list[tuple[str, list[dict]]]) -> list[dict]:
             "condition":          d["condition"],
             "seller":             d["seller"],
             "item_url":           d["item_url"],
+            "item_id":            d["item_id"],
+            "free_postage":       d["free_postage"],
+            "promoted":           d["promoted"],
+            "start_date":         d["start_date"],
+            "watchers":           d["watchers"],
+            "bids":               d["bids"]
         })
 
     return result

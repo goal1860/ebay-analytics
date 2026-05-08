@@ -68,6 +68,7 @@ main { padding: 20px 32px; max-width: 1400px; }
 table {
   width: 100%;
   border-collapse: collapse;
+  min-width: max-content;
 }
 thead {
   background: #f0f0f0;
@@ -84,12 +85,17 @@ th, td {
   padding: 9px 14px;
   text-align: left;
   border-bottom: 1px solid #eee;
+  white-space: nowrap;
 }
 tbody tr:last-child td { border-bottom: none; }
 tbody tr:hover { background: #fafafa; }
 
 td.num  { text-align: right; font-variant-numeric: tabular-nums; color: #555; }
-td.title { max-width: 340px; }
+td.title { 
+  max-width: 340px; 
+  white-space: normal; 
+  word-wrap: break-word;
+}
 td.seller { color: #555; font-size: 13px; }
 
 span.also {

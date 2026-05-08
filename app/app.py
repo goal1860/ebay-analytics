@@ -4,6 +4,8 @@ import requests
 from flask import Flask, render_template, request
 from dotenv import load_dotenv
 import sys
+import time
+import json
 
 # Add parent directory to sys.path so we can import auth
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
@@ -30,6 +32,23 @@ def get_category_tree(token, tree_id='2'):
     response.raise_for_status()
     return response.json()
 
+def get_cached_category_tree(token, tree_id):
+    cache_dir = os.path.join(os.path.dirname(__file__), "..", "data")
+    cache_file = os.path.join(cache_dir, f"categories_{tree_id}.json")
+    
+    # Return cache if less than 7 days old
+    if os.path.exists(cache_file):
+        if time.time() - os.path.getmtime(cache_file) < 7 * 24 * 3600:
+            with open(cache_file, "r", encoding="utf-8") as f:
+                return json.load(f)
+                
+    # Otherwise fetch and save
+    tree = get_category_tree(token, tree_id)['rootCategoryNode']['childCategoryTreeNodes']
+    os.makedirs(cache_dir, exist_ok=True)
+    with open(cache_file, "w", encoding="utf-8") as f:
+        json.dump(tree, f)
+    return tree
+
 MARKETS = {
     "US": "0",
     "Canada": "2",
@@ -47,7 +66,7 @@ def categories():
     tree_id = MARKETS[market]
     if tree_id not in tree_cache:
         token = get_app_token()
-        tree_cache[tree_id] = get_category_tree(token, tree_id)['rootCategoryNode']['childCategoryTreeNodes']
+        tree_cache[tree_id] = get_cached_category_tree(token, tree_id)
         
     return render_template("categories.html", 
                            nodes=tree_cache[tree_id], 
