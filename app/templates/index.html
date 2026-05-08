@@ -43,7 +43,7 @@
         <thead>
           <tr>
             {% set cols = [("rank","Rank"),("title","Title"),("primary_category","Category"),
-                           ("score","Score"),("price","Price"),("condition","Condition"),("seller","Seller")] %}
+                           ("score","Score"),("price","Price"),("market","Market"),("condition","Condition"),("seller","Seller")] %}
             {% for col, label in cols %}
               {% set next_order = "asc" if (sort == col and order == "asc") else "desc" %}
               {% set arrow = "↑" if (sort == col and order == "asc") else ("↓" if sort == col else "") %}
@@ -69,12 +69,18 @@
             </td>
             <td class="num">{{ "%.3f"|format(item.score) }}</td>
             <td class="num">${{ "%.2f"|format(item.price) }}</td>
+            <td>
+              {% if '.co.uk' in item.item_url %}UK
+              {% elif '.ca' in item.item_url %}Canada
+              {% elif '.com.au' in item.item_url %}Australia
+              {% else %}US{% endif %}
+            </td>
             <td>{{ item.condition }}</td>
             <td class="seller">{{ item.seller }}</td>
             <td><a href="{{ item.item_url }}" target="_blank" rel="noopener">View ↗</a></td>
           </tr>
           {% else %}
-          <tr><td colspan="8" class="empty">No items match your filters.</td></tr>
+          <tr><td colspan="9" class="empty">No items match your filters.</td></tr>
           {% endfor %}
         </tbody>
       </table>
