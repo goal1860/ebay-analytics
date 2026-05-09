@@ -96,8 +96,16 @@ def index():
     sort     = request.args.get("sort", "rank")
     order    = request.args.get("order", "asc")
 
-    allowed_sorts = {"rank", "price", "score", "title", "primary_category"}
-    if sort not in allowed_sorts:
+    # All real DB columns that can be used in ORDER BY
+    allowed_sorts = {
+        "rank", "item_id", "title", "primary_category", "also_in_categories",
+        "score", "price", "currency", "condition", "seller",
+        "free_postage", "promoted", "start_date", "watchers", "bids"
+    }
+    # 'market' is derived from item_url in the template; sort by item_url as proxy
+    if sort == "market":
+        sort = "item_url"
+    elif sort not in allowed_sorts:
         sort = "rank"
     dir_sql = "DESC" if order == "desc" else "ASC"
 
@@ -116,7 +124,7 @@ def index():
     if category:
         sql += " AND primary_category = ?"
         params.append(category)
-    sql += f" ORDER BY {sort} {dir_sql}"
+    sql += f' ORDER BY "{sort}" {dir_sql}'
 
     items = query(sql, tuple(params))
 
