@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>eBay Categories - Mind Tree</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    .category-container {
+      background: #fafafa;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.05);
+      margin-top: 20px;
+      overflow-x: auto;
+    }
+    
+    /* Mind Tree Styles */
+    .tree, .tree ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+    .tree ul {
+        margin-left: 20px;
+        padding-left: 20px;
+        border-left: 2px solid #cbd5e1; /* Connecting vertical line */
+        display: none; /* Collapsed by default */
+    }
+    .tree-root > ul {
+        display: block; /* Root always visible */
+    }
+    .tree li {
+        margin: 8px 0;
+        padding-left: 15px;
+        position: relative;
+    }
+    .tree li::before {
+        content: "";
+        position: absolute;
+        top: 18px;
+        left: 0;
+        width: 15px;
+        border-top: 2px solid #cbd5e1; /* Connecting horizontal line */
+    }
+    .tree-root > li::before {
+        display: none; /* No line for root items */
+    }
+    .tree-root {
+        border-left: none;
+        padding-left: 0;
+        margin-left: 0;
+    }
+    
+    /* Node Bubbles */
+    .tree p {
+        display: inline-block;
+        margin: 0;
+        padding: 8px 16px;
+        border-radius: 20px;
+        background-color: #ffffff;
+        border: 1px solid #e2e8f0;
+        font-size: 14px;
+        color: #334155;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        transition: all 0.2s ease;
+        position: relative;
+        z-index: 1;
+    }
+    .tree p:hover {
+        background-color: #f8fafc;
+        border-color: #94a3b8;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+    
+    /* Node with children */
+    .has-children > p {
+        cursor: pointer;
+        font-weight: 600;
+        border-color: #cbd5e1;
+    }
+    .has-children > p::after {
+        content: '+';
+        display: inline-block;
+        margin-left: 10px;
+        background: #f1f5f9;
+        color: #64748b;
+        border-radius: 50%;
+        width: 18px;
+        height: 18px;
+        line-height: 18px;
+        text-align: center;
+        font-size: 12px;
+        font-weight: bold;
+    }
+    .has-children.open > p::after {
+        content: '-';
+    }
+    .has-children.open > ul {
+        display: block;
+        animation: fadeIn 0.3s ease-in-out;
+    }
+    
+    /* Highlighted Node */
+    .highlight-node > p {
+        background-color: #e0f2fe;
+        border-color: #38bdf8;
+        color: #0369a1;
+        box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+    }
+    
+    /* ID Badge */
+    .id-badge {
+        color: #94a3b8;
+        font-size: 0.8em;
+        background: #f1f5f9;
+        padding: 2px 8px;
+        border-radius: 12px;
+        margin-left: 8px;
+        font-weight: normal;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateX(-5px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+    
+    /* Market Selector Styles */
+    .market-selector {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+    }
+    .market-tab {
+        padding: 10px 24px;
+        border-radius: 30px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 15px;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .active-market {
+        background-color: #0284c7;
+        color: white;
+        box-shadow: 0 4px 10px rgba(2, 132, 199, 0.3);
+    }
+    .inactive-market {
+        background-color: #f1f5f9;
+        color: #64748b;
+        border: 1px solid #e2e8f0;
+    }
+    .inactive-market:hover {
+        background-color: #e2e8f0;
+        color: #334155;
+        transform: translateY(-1px);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>eBay Categories</h1>
+    <p class="subtitle">Interactive Mind Tree UI</p>
+    <div style="margin-top: 10px;">
+      <a href="/" style="color: white; text-decoration: underline;">← Back to Top Sellers</a>
+    </div>
+  </header>
+
+  <main>
+    <div class="market-selector">
+      {% for market, tree_id in markets.items() %}
+        <a href="{{ url_for('categories', market=market) }}" 
+           class="market-tab {% if market == current_market %}active-market{% else %}inactive-market{% endif %}">
+          eBay {{ market }} 
+        </a>
+      {% endfor %}
+    </div>
+
+    <div class="category-container">
+      <p style="text-align:center; color:#64748b; margin-bottom:30px;">Click on category bubbles with a [+] to expand their branches (Showing {{ current_market }} market)</p>
+      
+      {% macro render_tree(nodes, root=False) %}
+      <ul class="tree {% if root %}tree-root{% endif %}">
+        {% for node in nodes %}
+          {% set cat = node.category %}
+          {% set children = node.childCategoryTreeNodes %}
+          <li class="{% if children %}has-children{% endif %}" data-name="{{ cat.categoryName }}">
+            <p>{{ cat.categoryName }} <span class="id-badge">ID: {{ cat.categoryId }}</span></p>
+            {% if children %}
+              {{ render_tree(children) }}
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+      {% endmacro %}
+      
+      {{ render_tree(nodes, root=True) }}
+    </div>
+  </main>
+
+  <script>
+      // Toggle logic
+      document.querySelectorAll('li.has-children > p').forEach(p => {
+          p.addEventListener('click', (e) => {
+              e.stopPropagation();
+              p.parentElement.classList.toggle('open');
+          });
+      });
+      
+      // Auto-highlight based on URL parameter
+      document.addEventListener("DOMContentLoaded", () => {
+          const params = new URLSearchParams(window.location.search);
+          const highlightName = params.get("highlight");
+          
+          if (highlightName) {
+              // Find the node by data-name attribute
+              const targetLi = Array.from(document.querySelectorAll('li')).find(li => li.getAttribute('data-name') === highlightName);
+              
+              if (targetLi) {
+                  // Add highlight class
+                  targetLi.classList.add('highlight-node');
+                  
+                  // Open all parent nodes so it becomes visible
+                  let parent = targetLi.parentElement;
+                  while (parent && parent.classList.contains('tree') && !parent.classList.contains('tree-root')) {
+                      // The parent of the UL is the LI with .has-children
+                      const parentLi = parent.closest('li.has-children');
+                      if (parentLi) {
+                          parentLi.classList.add('open');
+                      }
+                      parent = parentLi ? parentLi.parentElement : null;
+                  }
+                  
+                  // Scroll into view
+                  setTimeout(() => {
+                      targetLi.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  }, 100);
+              }
+          }
+      });
+  </script>
+</body>
+</html>
