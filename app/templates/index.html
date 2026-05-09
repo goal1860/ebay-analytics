@@ -25,6 +25,14 @@
         placeholder="Search titles…"
         autocomplete="off"
       >
+      <input
+        type="text"
+        name="item_id"
+        value="{{ item_id }}"
+        placeholder="Item number…"
+        autocomplete="off"
+        style="width: 160px;"
+      >
       <select name="category">
         <option value="">All categories</option>
         {% for cat in categories %}
@@ -32,7 +40,7 @@
         {% endfor %}
       </select>
       <button type="submit">Filter</button>
-      {% if q or category %}
+      {% if q or category or item_id %}
       <a href="/" class="clear">Clear</a>
       {% endif %}
     </form>
@@ -50,7 +58,7 @@
               {% set next_order = "asc" if (sort == col and order == "asc") else "desc" %}
               {% set arrow = "↑" if (sort == col and order == "asc") else ("↓" if sort == col else "") %}
               <th>
-                <a href="?q={{ q }}&category={{ category }}&sort={{ col }}&order={{ next_order }}">
+                <a href="?q={{ q }}&item_id={{ item_id }}&category={{ category }}&sort={{ col }}&order={{ next_order }}">
                   {{ label }} {{ arrow }}
                 </a>
               </th>
@@ -87,7 +95,7 @@
             </td>
             <td style="white-space: nowrap;">{{ item.start_date }}</td>
             <td>{{ item.condition }}</td>
-            <td class="seller">{{ item.seller }}</td>
+            <td class="seller"><a href="https://www.ebay.com/usr/{{ item.seller }}" target="_blank" rel="noopener">{{ item.seller }}</a></td>
             <td><a href="{{ item.item_url }}" target="_blank" rel="noopener">View ↗</a></td>
           </tr>
           {% else %}
