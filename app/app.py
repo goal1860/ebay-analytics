@@ -1,7 +1,7 @@
 import os
 import sqlite3
 import requests
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, make_response
 from dotenv import load_dotenv
 import sys
 import time
@@ -56,6 +56,7 @@ MARKETS = {
 }
 
 tree_cache = {}
+rendered_cache = {}
 
 @app.route("/categories")
 def categories():
@@ -63,20 +64,34 @@ def categories():
     if market not in MARKETS:
         market = "US"
         
+    # If we have a valid HTML cache for this market, return it instantly
+    if market in rendered_cache:
+        cache_time, html = rendered_cache[market]
+        if time.time() - cache_time < 7 * 24 * 3600:
+            resp = make_response(html)
+            resp.headers["Cache-Control"] = "public, max-age=604800"
+            return resp
+            
     tree_id = MARKETS[market]
     if tree_id not in tree_cache:
         token = get_app_token()
         tree_cache[tree_id] = get_cached_category_tree(token, tree_id)
         
-    return render_template("categories.html", 
+    html = render_template("categories.html", 
                            nodes=tree_cache[tree_id], 
                            current_market=market, 
                            markets=MARKETS)
+                           
+    rendered_cache[market] = (time.time(), html)
+    resp = make_response(html)
+    resp.headers["Cache-Control"] = "public, max-age=604800"
+    return resp
 
 
 @app.route("/")
 def index():
     q        = request.args.get("q", "").strip()
+    item_id  = request.args.get("item_id", "").strip()
     category = request.args.get("category", "").strip()
     sort     = request.args.get("sort", "rank")
     order    = request.args.get("order", "asc")
@@ -95,6 +110,9 @@ def index():
     if q:
         sql += " AND title LIKE ?"
         params.append(f"%{q}%")
+    if item_id:
+        sql += " AND item_id = ?"
+        params.append(item_id)
     if category:
         sql += " AND primary_category = ?"
         params.append(category)
@@ -106,6 +124,7 @@ def index():
         items=items,
         categories=categories,
         q=q,
+        item_id=item_id,
         category=category,
         sort=sort,
         order=order,
