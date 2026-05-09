@@ -29,13 +29,7 @@ CREATE TABLE IF NOT EXISTS top_sellers (
     currency           TEXT,
     condition          TEXT,
     seller             TEXT,
-    item_url           TEXT,
-    item_id            TEXT,
-    free_postage       TEXT,
-    promoted           TEXT,
-    start_date         TEXT,
-    watchers           TEXT,
-    bids               TEXT
+    item_url           TEXT
 );
 """
 
@@ -62,20 +56,13 @@ def import_csv(conn: sqlite3.Connection):
             r["condition"],
             r["seller"],
             r["item_url"],
-            r["item_id"],
-            r["free_postage"],
-            r["promoted"],
-            r["start_date"],
-            r["watchers"],
-            r["bids"],
         ) for r in reader]
 
     conn.executemany("""
         INSERT INTO top_sellers
             (rank, title, primary_category, also_in_categories,
-             score, price, currency, condition, seller, item_url,
-             item_id, free_postage, promoted, start_date, watchers, bids)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+             score, price, currency, condition, seller, item_url)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, rows)
     return len(rows)
 

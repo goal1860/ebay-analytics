@@ -25,7 +25,6 @@ import json
 import time
 import base64
 import requests
-from datetime import datetime, timezone
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -83,53 +82,6 @@ def get_app_token() -> str:
     resp.raise_for_status()
     _token_cache["token"] = resp.json()["access_token"]
     return _token_cache["token"]
-
-
-BROWSE_ITEM_URL = "https://api.ebay.com/buy/browse/v1/item"
-
-def extract_item_id_from_url(url: str) -> str:
-    """Extract the numeric item ID from an eBay item URL.
-    e.g. 'https://www.ebay.com/itm/272717839990?hash=...' -> '272717839990'
-    """
-    if not url:
-        return ""
-    try:
-        path = url.split("/itm/")[-1]   # take everything after /itm/
-        return path.split("?")[0].strip() # strip query string
-    except Exception:
-        return ""
-
-def parse_date_utc(iso_str: str) -> str:
-    """Parse ISO 8601 UTC date string and return as YYYY-MM-DD in UTC.
-    e.g. '2023-08-15T20:59:07.000Z' -> '2023-08-15'
-    NOTE: eBay stores dates in UTC. The correct 'start date' to show
-    is the UTC date of listing creation, matching what eBay's own
-    Research tools display (they show the seller's local date).
-    """
-    if not iso_str:
-        return "-"
-    try:
-        dt = datetime.fromisoformat(iso_str.replace("Z", "+00:00"))
-        return dt.strftime("%d %b %Y")
-    except Exception:
-        return iso_str.split("T")[0]
-
-
-def fetch_item_detail(item_id: str, token: str) -> dict:
-    """Fetch full item detail from GET /item/{itemId}.
-    Returns empty dict on failure.
-    """
-    url = f"{BROWSE_ITEM_URL}/{item_id}"
-    try:
-        resp = requests.get(url,
-            headers={"Authorization": f"Bearer {token}",
-                     "X-EBAY-C-MARKETPLACE-ID": "EBAY_US"},
-            timeout=15)
-        if resp.status_code == 200:
-            return resp.json()
-    except Exception:
-        pass
-    return {}
 
 
 # ── Fetch ─────────────────────────────────────────────────────────────────────
@@ -195,24 +147,15 @@ def rank_items(category_results: list[tuple[str, list[dict]]]) -> list[dict]:
                 categories[iid].append(cat_name)
 
             if iid not in best_data or rank < best_data[iid]["_rank"]:
-                item_url = it.get("itemWebUrl", "")
                 best_data[iid] = {
                     "_rank":    rank,
-                    "item_id":  extract_item_id_from_url(item_url) or iid,
+                    "item_id":  iid,
                     "title":    it.get("title", ""),
                     "price":    float(it.get("price", {}).get("value", 0)),
                     "currency": it.get("price", {}).get("currency", "USD"),
                     "condition": it.get("condition", ""),
                     "seller":   it.get("seller", {}).get("username", ""),
                     "item_url": it.get("itemWebUrl", ""),
-                    "free_postage": "Yes" if it.get("shippingOptions", [{}])[0].get("shippingCost", {}).get("value", "") == "0.00" else "No",
-                    "promoted": "Yes" if it.get("priorityListing", False) else "No",
-                    "start_date": parse_date_utc(it.get("itemCreationDate", "")),
-                    # watchCount is not available in item_summary/search.
-                    # It requires GET /item/{id} but is also not returned there.
-                    # eBay's Merchandising/Analytics APIs (seller-scoped) would be needed.
-                    "watchers": "-",
-                    "bids": "-"
                 }
 
     ranked = sorted(scores.keys(), key=lambda iid: -scores[iid])
@@ -231,12 +174,6 @@ def rank_items(category_results: list[tuple[str, list[dict]]]) -> list[dict]:
             "condition":          d["condition"],
             "seller":             d["seller"],
             "item_url":           d["item_url"],
-            "item_id":            d["item_id"],
-            "free_postage":       d["free_postage"],
-            "promoted":           d["promoted"],
-            "start_date":         d["start_date"],
-            "watchers":           d["watchers"],
-            "bids":               d["bids"]
         })
 
     return result

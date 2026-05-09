@@ -10,9 +10,6 @@
   <header>
     <h1>eBay Top Sellers</h1>
     <p class="subtitle">{{ total }} items ranked by eBay bestMatch across 20 categories</p>
-    <div style="margin-top: 10px;">
-      <a href="/categories" style="color: white; text-decoration: underline;">View Full Category Tree</a>
-    </div>
   </header>
 
   <main>
@@ -25,14 +22,6 @@
         placeholder="Search titles…"
         autocomplete="off"
       >
-      <input
-        type="text"
-        name="item_id"
-        value="{{ item_id }}"
-        placeholder="Item number…"
-        autocomplete="off"
-        style="width: 160px;"
-      >
       <select name="category">
         <option value="">All categories</option>
         {% for cat in categories %}
@@ -40,7 +29,7 @@
         {% endfor %}
       </select>
       <button type="submit">Filter</button>
-      {% if q or category or item_id %}
+      {% if q or category %}
       <a href="/" class="clear">Clear</a>
       {% endif %}
     </form>
@@ -50,15 +39,13 @@
       <table>
         <thead>
           <tr>
-            {% set cols = [("rank","Rank"),("item_id","Item ID"),("title","Title"),("primary_category","Category"),
-                           ("price","Price"),("market","Market"),("free_postage", "Free Post"),
-                           ("bids","Bids"),("watchers","Watchers"),("promoted","Promoted"),
-                           ("start_date","Start Date"),("condition","Condition"),("seller","Seller")] %}
+            {% set cols = [("rank","Rank"),("title","Title"),("primary_category","Category"),
+                           ("score","Score"),("price","Price"),("condition","Condition"),("seller","Seller")] %}
             {% for col, label in cols %}
               {% set next_order = "asc" if (sort == col and order == "asc") else "desc" %}
               {% set arrow = "↑" if (sort == col and order == "asc") else ("↓" if sort == col else "") %}
               <th>
-                <a href="?q={{ q }}&item_id={{ item_id }}&category={{ category }}&sort={{ col }}&order={{ next_order }}">
+                <a href="?q={{ q }}&category={{ category }}&sort={{ col }}&order={{ next_order }}">
                   {{ label }} {{ arrow }}
                 </a>
               </th>
@@ -70,36 +57,21 @@
           {% for item in items %}
           <tr>
             <td class="num">{{ item.rank }}</td>
-            <td class="num" style="font-size: 0.9em; color: #64748b;">{{ item.item_id }}</td>
             <td class="title">{{ item.title }}</td>
             <td>
-              <a href="/categories?highlight={{ item.primary_category | urlencode }}">{{ item.primary_category }}</a>
+              {{ item.primary_category }}
               {% if item.also_in_categories %}
               <span class="also" title="Also in: {{ item.also_in_categories }}">+</span>
               {% endif %}
             </td>
+            <td class="num">{{ "%.3f"|format(item.score) }}</td>
             <td class="num">${{ "%.2f"|format(item.price) }}</td>
-            <td>
-              {% if '.co.uk' in item.item_url %}UK
-              {% elif '.ca' in item.item_url %}Canada
-              {% elif '.com.au' in item.item_url %}Australia
-              {% else %}US{% endif %}
-            </td>
-            <td style="text-align: center;">
-              {% if item.free_postage == 'Yes' %}<span style="color: #10b981; font-weight: bold;">Yes</span>{% else %}No{% endif %}
-            </td>
-            <td class="num" style="text-align: center;">{{ item.bids }}</td>
-            <td class="num" style="text-align: center; font-weight: bold;">{{ item.watchers }}</td>
-            <td style="text-align: center;">
-              {% if item.promoted == 'Yes' %}✓{% else %}—{% endif %}
-            </td>
-            <td style="white-space: nowrap;">{{ item.start_date }}</td>
             <td>{{ item.condition }}</td>
-            <td class="seller"><a href="https://www.ebay.com/usr/{{ item.seller }}" target="_blank" rel="noopener">{{ item.seller }}</a></td>
+            <td class="seller">{{ item.seller }}</td>
             <td><a href="{{ item.item_url }}" target="_blank" rel="noopener">View ↗</a></td>
           </tr>
           {% else %}
-          <tr><td colspan="14" class="empty">No items match your filters.</td></tr>
+          <tr><td colspan="8" class="empty">No items match your filters.</td></tr>
           {% endfor %}
         </tbody>
       </table>

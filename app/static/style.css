@@ -17,7 +17,7 @@ header h1 { font-size: 22px; font-weight: 600; }
 header .subtitle { color: #aaa; margin-top: 4px; font-size: 13px; }
 
 /* Main */
-main { padding: 20px 32px; max-width: none; }
+main { padding: 20px 32px; max-width: 1400px; }
 
 /* Filters */
 .filters {
@@ -77,23 +77,19 @@ thead th a {
   text-decoration: none;
   color: #333;
   font-weight: 600;
+  white-space: nowrap;
 }
 thead th a:hover { color: #1a1a2e; }
 th, td {
-  padding: 8px 10px;
+  padding: 9px 14px;
   text-align: left;
   border-bottom: 1px solid #eee;
-  font-size: 13px;
 }
 tbody tr:last-child td { border-bottom: none; }
 tbody tr:hover { background: #fafafa; }
 
 td.num  { text-align: right; font-variant-numeric: tabular-nums; color: #555; }
-td.title { 
-  max-width: 300px; 
-  white-space: normal; 
-  word-wrap: break-word;
-}
+td.title { max-width: 340px; }
 td.seller { color: #555; font-size: 13px; }
 
 span.also {
